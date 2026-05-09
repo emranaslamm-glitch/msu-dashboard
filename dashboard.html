@@ -150,40 +150,40 @@ tr:hover td{background:#f8fbff;}
 
   <!-- SUMMARY -->
   <div class="section-header"><div class="section-icon" style="background:#e3f2fd">📊</div><div class="section-title">Summary</div><div class="section-line"></div></div>
-  <div class="metric-grid" id="metrics"></div>
+  <div class="metric-grid" id="metrics"></div><p id="desc-summary" style="font-size:11px;color:#546e7a;background:white;border-radius:10px;padding:12px 16px;margin-bottom:16px;line-height:1.6;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid #1976d2;"></p>
 
   <!-- FP SERVICES -->
   <div class="section-header"><div class="section-icon" style="background:#e8f5e9">💊</div><div class="section-title">Family Planning Services</div><div class="section-line"></div></div>
   <div class="chart-row">
-    <div class="chart-box"><div class="chart-title">FP clients by district <span class="chart-badge">Bar</span></div><div class="legend" id="legend1"></div><div style="position:relative;height:180px;"><canvas id="districtChart"></canvas></div></div>
-    <div class="chart-box"><div class="chart-title">Method mix <span class="chart-badge">Doughnut</span></div><div class="legend" id="legend2"></div><div style="position:relative;height:180px;"><canvas id="methodChart"></canvas></div></div>
+    <div class="chart-box"><div class="chart-title">FP clients by district <span class="chart-badge">Bar</span></div><div class="legend" id="legend1"></div><div style="position:relative;height:180px;"><canvas id="districtChart"></canvas></div><p id="desc-fp-district" style="font-size:11px;color:#78909c;margin-top:10px;line-height:1.5;"></p></div>
+    <div class="chart-box"><div class="chart-title">Method mix <span class="chart-badge">Doughnut</span></div><div class="legend" id="legend2"></div><div style="position:relative;height:180px;"><canvas id="methodChart"></canvas></div><p id="desc-method" style="font-size:11px;color:#78909c;margin-top:10px;line-height:1.5;"></p></div>
   </div>
   <div class="chart-row">
-    <div class="chart-box"><div class="chart-title">FP methods by district <span class="chart-badge">Grouped</span></div><div class="legend" id="legend8"></div><div style="position:relative;height:180px;"><canvas id="fpDistrictChart"></canvas></div></div>
-    <div class="chart-box"><div class="chart-title">FP methods by month <span class="chart-badge">Trend</span></div><div class="legend" id="legend9"></div><div style="position:relative;height:180px;"><canvas id="fpMonthChart"></canvas></div></div>
+    <div class="chart-box"><div class="chart-title">FP methods by district <span class="chart-badge">Grouped</span></div><div class="legend" id="legend8"></div><div style="position:relative;height:180px;"><canvas id="fpDistrictChart"></canvas></div><p id="desc-fp-group" style="font-size:11px;color:#78909c;margin-top:10px;line-height:1.5;"></p></div>
+    <div class="chart-box"><div class="chart-title">FP methods by month <span class="chart-badge">Trend</span></div><div class="legend" id="legend9"></div><div style="position:relative;height:180px;"><canvas id="fpMonthChart"></canvas></div><p id="desc-fp-month" style="font-size:11px;color:#78909c;margin-top:10px;line-height:1.5;"></p></div>
   </div>
 
   <!-- MCS -->
   <div class="section-header"><div class="section-icon" style="background:#fce4ec">🤱</div><div class="section-title">Mother & Child Services</div><div class="section-line"></div></div>
   <div class="chart-row">
-    <div class="chart-box"><div class="chart-title">MCS breakdown <span class="chart-badge">Bar</span></div><div class="legend" id="legend3"></div><div style="position:relative;height:180px;"><canvas id="mcsChart"></canvas></div></div>
-    <div class="chart-box"><div class="chart-title">Camps per district <span class="chart-badge">Bar</span></div><div class="legend" id="legend4"></div><div style="position:relative;height:180px;"><canvas id="campsChart"></canvas></div></div>
+    <div class="chart-box"><div class="chart-title">MCS breakdown <span class="chart-badge">Bar</span></div><div class="legend" id="legend3"></div><div style="position:relative;height:180px;"><canvas id="mcsChart"></canvas></div><p id="desc-mcs" style="font-size:11px;color:#78909c;margin-top:10px;line-height:1.5;"></p></div>
+    <div class="chart-box"><div class="chart-title">Camps per district <span class="chart-badge">Bar</span></div><div class="legend" id="legend4"></div><div style="position:relative;height:180px;"><canvas id="campsChart"></canvas></div><p id="desc-camps" style="font-size:11px;color:#78909c;margin-top:10px;line-height:1.5;"></p></div>
   </div>
 
   <!-- CHILDREN -->
   <div class="section-header"><div class="section-icon" style="background:#fff8e1">👶</div><div class="section-title">Children Breakdown</div><div class="section-line"></div></div>
   <div class="chart-row">
-    <div class="chart-box"><div class="chart-title">Children by district <span class="chart-badge">Bar</span></div><div class="legend" id="legend5"></div><div style="position:relative;height:180px;"><canvas id="childrenDistrictChart"></canvas></div></div>
-    <div class="chart-box"><div class="chart-title">Children by month <span class="chart-badge">Trend</span></div><div class="legend" id="legend6"></div><div style="position:relative;height:180px;"><canvas id="childrenMonthChart"></canvas></div></div>
+    <div class="chart-box"><div class="chart-title">Children by district <span class="chart-badge">Bar</span></div><div class="legend" id="legend5"></div><div style="position:relative;height:180px;"><canvas id="childrenDistrictChart"></canvas></div><p id="desc-child-district" style="font-size:11px;color:#78909c;margin-top:10px;line-height:1.5;"></p></div>
+    <div class="chart-box"><div class="chart-title">Children by month <span class="chart-badge">Trend</span></div><div class="legend" id="legend6"></div><div style="position:relative;height:180px;"><canvas id="childrenMonthChart"></canvas></div><p id="desc-child-month" style="font-size:11px;color:#78909c;margin-top:10px;line-height:1.5;"></p></div>
   </div>
   <div class="chart-row-full">
-    <div class="chart-box"><div class="chart-title">Children vs Adults by district <span class="chart-badge">Grouped</span></div><div class="legend" id="legend7"></div><div style="position:relative;height:180px;"><canvas id="childrenAdultsChart"></canvas></div></div>
+    <div class="chart-box"><div class="chart-title">Children vs Adults by district <span class="chart-badge">Grouped</span></div><div class="legend" id="legend7"></div><div style="position:relative;height:180px;"><canvas id="childrenAdultsChart"></canvas></div><p id="desc-child-adult" style="font-size:11px;color:#78909c;margin-top:10px;line-height:1.5;"></p></div>
   </div>
 
   <!-- CAMP DISTRIBUTION -->
   <div class="section-header"><div class="section-icon" style="background:#ede7f6">🏕️</div><div class="section-title">Camp Distribution by District</div><div class="section-line"></div></div>
   <div class="chart-row-full">
-    <div class="chart-box"><div class="chart-title">Camps per district — descending order with percentage</div><div id="funnelChart" style="padding:8px 0;"></div></div>
+    <div class="chart-box"><div class="chart-title">Camps per district — descending order with percentage</div><div id="funnelChart" style="padding:8px 0;"></div><p id="desc-funnel" style="font-size:11px;color:#78909c;margin-top:10px;line-height:1.5;"></p></div>
   </div>
 
   <!-- TABLE -->
@@ -361,6 +361,7 @@ function renderAll(){
   renderFunnel(data);
 
   document.getElementById("tableCount").textContent=data.length+" records";
+  updateDescriptions(data, districts, childByDistrict, distFP, fpV, mcsV, campCounts);
   document.getElementById("campBody").innerHTML=data.map(function(r){return "<tr><td>"+r.sno+"</td><td>"+r.camp+"</td><td><span class=badge>"+r.district+"</span></td><td>"+r.month+"</td><td>"+r.year+"</td><td>"+r.dated+"</td><td>"+r.iuds+"</td><td>"+r.implants+"</td><td>"+r.oralCoc+"</td><td>"+r.condoms+"</td><td>"+r.depo+"</td><td>"+r.general+"</td><td>"+r.prenatal+"</td><td>"+r.postnatal+"</td><td><span class=badge-green>"+r.children+"</span></td><td>"+r.adult+"</td></tr>";}).join("");
 }
 
@@ -462,6 +463,62 @@ function exportWord(){
 
 function printReport(){window.print();}
 
+
+function updateDescriptions(data, districts, childByDistrict, distFP, fpV, mcsV, campCounts) {
+  var totalFP = distFP.reduce(function(a,b){return a+b;},0);
+  var totalMCS = mcsV.reduce(function(a,b){return a+b;},0);
+  var totalChildren = childByDistrict.reduce(function(a,b){return a+b;},0);
+  var topFPDistrict = districts[distFP.indexOf(Math.max.apply(null,distFP))];
+  var topCampDistrict = districts[campCounts.indexOf(Math.max.apply(null,campCounts))];
+  var topChildDistrict = districts[childByDistrict.indexOf(Math.max.apply(null,childByDistrict))];
+  var totalIUDs = fpV[0]; var totalImplants = fpV[1]; var totalCoc = fpV[2];
+  var totalCondoms = fpV[4]; var totalDepo = fpV[7];
+  var topFPMethod = ["IUDs","Implants","Oral CoC","Oral PoP","Condoms","Sayana","ECP","Depo"][fpV.indexOf(Math.max.apply(null,fpV))];
+
+  // Summary description
+  var summaryEl = document.getElementById("desc-summary");
+  if(summaryEl) summaryEl.innerHTML = "This dashboard covers <strong>"+data.length+" outreach camps</strong> across "+districts.length+" districts of Gilgit-Baltistan. A total of <strong>"+totalFP.toLocaleString()+" family planning clients</strong> were served alongside <strong>"+totalMCS.toLocaleString()+" mother & child services</strong>. <strong>"+topFPDistrict+"</strong> recorded the highest FP uptake among all districts.";
+
+  // FP by district description
+  var fpDistEl = document.getElementById("desc-fp-district");
+  if(fpDistEl) fpDistEl.innerHTML = "<strong>"+topFPDistrict+"</strong> leads all districts with the highest number of FP clients ("+Math.max.apply(null,distFP).toLocaleString()+"). The chart shows the distribution of FP services across all districts covered by MSU camps.";
+
+  // Method mix description
+  var methodEl = document.getElementById("desc-method");
+  if(methodEl) methodEl.innerHTML = "The most popular FP method is <strong>"+topFPMethod+"</strong>. IUDs account for "+totalIUDs+" clients, Oral CoC for "+totalCoc+", Condoms for "+totalCondoms+", and Depo Injections for "+totalDepo+". Implants were provided to "+totalImplants+" clients.";
+
+  // FP by district grouped description
+  var fpGroupEl = document.getElementById("desc-fp-group");
+  if(fpGroupEl) fpGroupEl.innerHTML = "This chart breaks down FP method uptake by district. Use the <strong>FP Method filter</strong> above to focus on a specific method and see which districts are using it most.";
+
+  // FP by month description
+  var fpMonthEl = document.getElementById("desc-fp-month");
+  if(fpMonthEl) fpMonthEl.innerHTML = "This trend line shows how FP service delivery has changed over time. Use this to identify months with peak activity and plan future camp scheduling accordingly.";
+
+  // MCS description
+  var mcsEl = document.getElementById("desc-mcs");
+  if(mcsEl) mcsEl.innerHTML = "Mother & Child Services (MCS) cover general patients, pre-natal, post-natal, children, and adult services. A total of <strong>"+totalMCS.toLocaleString()+" MCS clients</strong> were served. Pre-natal visits: "+mcsV[1]+", Post-natal: "+mcsV[2]+", Children: "+mcsV[3]+".";
+
+  // Camps per district description
+  var campsEl = document.getElementById("desc-camps");
+  if(campsEl) campsEl.innerHTML = "<strong>"+topCampDistrict+"</strong> hosted the most camps ("+Math.max.apply(null,campCounts)+"). This reflects the outreach effort and accessibility of MSU services in each district.";
+
+  // Children by district description
+  var childDistEl = document.getElementById("desc-child-district");
+  if(childDistEl) childDistEl.innerHTML = "<strong>"+topChildDistrict+"</strong> has the highest number of children served ("+Math.max.apply(null,childByDistrict)+"). Total children served across all districts: <strong>"+totalChildren.toLocaleString()+"</strong>.";
+
+  // Children by month description
+  var childMonthEl = document.getElementById("desc-child-month");
+  if(childMonthEl) childMonthEl.innerHTML = "This trend shows child service delivery over time. Peaks indicate months where more children were reached through MSU outreach camps.";
+
+  // Children vs Adults description
+  var childAdultEl = document.getElementById("desc-child-adult");
+  if(childAdultEl) childAdultEl.innerHTML = "This chart compares children and adult patients served in each district. It helps identify districts with higher child healthcare needs versus adult-focused services.";
+
+  // Funnel description
+  var funnelEl = document.getElementById("desc-funnel");
+  if(funnelEl) funnelEl.innerHTML = "Camp distribution shows the percentage share of each district. <strong>"+topCampDistrict+"</strong> has the highest camp coverage. This helps identify underserved districts that may need more outreach attention.";
+}
 function loadData(){
   var btn=document.getElementById("refreshBtn");
   var status=document.getElementById("statusMsg");
