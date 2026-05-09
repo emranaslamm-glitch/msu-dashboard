@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MSU Outreach Camps Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;}
+body{background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);min-height:100vh;padding:24px;}
+h1{font-size:22px;color:#ffffff;margin-bottom:2px;font-weight:700;letter-spacing:0.5px;}
+.subtitle{font-size:12px;color:#90caf9;margin-bottom:0;}
+.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;background:rgba(255,255,255,0.07);border-radius:14px;padding:16px 20px;border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(10px);}
+.btn-refresh{padding:10px 22px;background:linear-gradient(135deg,#f093fb,#f5576c);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 15px rgba(240,83,251,0.4);letter-spacing:0.5px;transition:all 0.2s;}
+.btn-refresh:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(240,83,251,0.5);}
+.btn-refresh:disabled{background:#555;box-shadow:none;transform:none;}
+.btn-reset{padding:8px 16px;background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:10px;font-size:13px;cursor:pointer;transition:all 0.2s;}
+.btn-reset:hover{background:rgba(255,255,255,0.2);}
+.status{font-size:12px;margin-top:4px;}
+.status.ok{color:#69f0ae;}
+.status.error{color:#ff5252;}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center;background:rgba(255,255,255,0.07);border-radius:14px;padding:14px 20px;border:1px solid rgba(255,255,255,0.1);}
+.filters label{font-size:12px;color:#90caf9;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+select{font-size:13px;padding:7px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,#1a3a5c,#1e4d7b);color:#fff;cursor:pointer;outline:none;box-shadow:0 2px 8px rgba(0,0,0,0.3);}
+select option{background:#1a3a5c;color:#fff;}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:22px;}
+.metric{background:rgba(255,255,255,0.08);border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(10px);transition:transform 0.2s;}
+.metric:hover{transform:translateY(-2px);}
+.metric-label{font-size:11px;color:#90caf9;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+.metric-value{font-size:26px;font-weight:700;color:#ffffff;}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.chart-row-full{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:20px;}
+.chart-box{background:rgba(255,255,255,0.08);border-radius:14px;padding:18px;border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(10px);}
+.chart-title{font-size:13px;font-weight:600;color:#e3f2fd;margin-bottom:10px;letter-spacing:0.3px;}
+.section-heading{font-size:13px;font-weight:700;color:#f093fb;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid rgba(240,83,251,0.4);text-transform:uppercase;letter-spacing:1px;}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;font-size:11px;color:#b0bec5;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.table-box{background:rgba(255,255,255,0.08);border-radius:14px;padding:18px;border:1px solid rgba(255,255,255,0.12);overflow-x:auto;margin-bottom:20px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;font-weight:600;color:#90caf9;font-size:11px;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,0.1);white-space:nowrap;text-transform:uppercase;letter-spacing:0.5px;}
+td{padding:9px 8px;color:#e3f2fd;border-bottom:1px solid rgba(255,255,255,0.05);white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,0.05);}
+.badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;background:rgba(33,150,243,0.25);color:#90caf9;border:1px solid rgba(33,150,243,0.3);}
+.badge-green{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;background:rgba(105,240,174,0.2);color:#69f0ae;border:1px solid rgba(105,240,174,0.3);}
+.top-actions{display:flex;gap:8px;align-items:center;}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <h1>🏥 MSU Outreach Camps — GB Dashboard</h1>
+    <p class="status ok" id="statusMsg">Click Refresh to load latest data</p>
+  </div>
+  <div class="top-actions">
+    <button class="btn-reset" onclick="resetFilters()">✕ Reset filters</button>
+    <button class="btn-refresh" id="refreshBtn" onclick="loadData()">⟳ Refresh</button>
+  </div>
+</div>
+
+<div class="filters">
+  <label>Year:</label>
+  <select id="yearFilter" onchange="renderAll()"></select>
+  <label>Quarter:</label>
+  <select id="quarterFilter" onchange="renderAll()"></select>
+  <label>Month:</label>
+  <select id="monthFilter" onchange="renderAll()"></select>
+  <label>District:</label>
+  <select id="districtFilter" onchange="renderAll()"></select>
+  <label>Date:</label>
+  <select id="datedFilter" onchange="renderAll()"></select>
+</div>
+
+<p class="section-heading">📊 Summary</p>
+<div class="metric-grid" id="metrics"></div>
+
+<p class="section-heading">💊 Family Planning Services</p>
+<div class="chart-row">
+  <div class="chart-box">
+    <p class="chart-title">FP clients by district</p>
+    <div class="legend" id="legend1"></div>
+    <div style="position:relative;height:220px;"><canvas id="districtChart"></canvas></div>
+  </div>
+  <div class="chart-box">
+    <p class="chart-title">Method mix</p>
+    <div class="legend" id="legend2"></div>
+    <div style="position:relative;height:220px;"><canvas id="methodChart"></canvas></div>
+  </div>
+</div>
+
+<p class="section-heading">🤱 Mother & Child Services</p>
+<div class="chart-row">
+  <div class="chart-box">
+    <p class="chart-title">MCS breakdown</p>
+    <div class="legend" id="legend3"></div>
+    <div style="position:relative;height:200px;"><canvas id="mcsChart"></canvas></div>
+  </div>
+  <div class="chart-box">
+    <p class="chart-title">Camps per district</p>
+    <div class="legend" id="legend4"></div>
+    <div style="position:relative;height:200px;"><canvas id="campsChart"></canvas></div>
+  </div>
+</div>
+
+<p class="section-heading">👶 Children Breakdown</p>
+<div class="chart-row">
+  <div class="chart-box">
+    <p class="chart-title">Children served by district</p>
+    <div class="legend" id="legend5"></div>
+    <div style="position:relative;height:220px;"><canvas id="childrenDistrictChart"></canvas></div>
+  </div>
+  <div class="chart-box">
+    <p class="chart-title">Children served by month</p>
+    <div class="legend" id="legend6"></div>
+    <div style="position:relative;height:220px;"><canvas id="childrenMonthChart"></canvas></div>
+  </div>
+</div>
+<div class="chart-row-full">
+  <div class="chart-box">
+    <p class="chart-title">Children vs Adults by district</p>
+    <div class="legend" id="legend7"></div>
+    <div style="position:relative;height:220px;"><canvas id="childrenAdultsChart"></canvas></div>
+  </div>
+</div>
+
+<p class="section-heading">📋 Camp Detail</p>
+<div class="table-box">
+  <table>
+    <thead><tr>
+      <th>#</th><th>Camp</th><th>District</th><th>Month</th><th>Year</th><th>Dated</th>
+      <th>IUDs</th><th>Implants</th><th>Oral CoC</th><th>Condoms</th>
+      <th>Depo inj</th><th>General</th><th>Pre-natal</th><th>Post-natal</th>
+      <th>Children</th><th>Adults</th>
+    </tr></thead>
+    <tbody id="campBody"></tbody>
+  </table>
+</div>
+
+<script>
+const DCOLS=['#64b5f6','#69f0ae','#ffb74d','#ef9a9a','#ce93d8','#80deea','#fff176','#a5d6a7'];
+const MCOLS=['#64b5f6','#69f0ae','#ffb74d','#ef9a9a','#ce93d8','#80deea','#fff176','#a5d6a7'];
+const MCSCOLS=['#64b5f6','#69f0ae','#ce93d8','#ffb74d','#ef9a9a'];
+const MONTHS=['December','January','February','
+
+
+
+March','April','May','June','July','August','September','October','November'];
+let ALL_DATA=[],charts={};
+
+const chartDefaults={
+  color:'#e3f2fd',
+  plugins:{legend:{display:false}},
+};
+
+function parseCSV(text){
+  return text.trim().split('\n').map(line=>{
+    const cols=[];let cur='';let inQ=false;
+    for(let i=0;i<line.length;i++){
+      if(line[i]==='"'){inQ=!inQ;}
+      else if(line[i]===','&&!inQ){cols.push(cur.trim());cur='';}
+      else{cur+=line[i];}
+    }
+    cols.push(cur.trim());return cols;
+  });
+}
+
+function findHeaderRow(rows){
+  for(let i=0;i<rows.length;i++){
+    if(rows[i].some(c=>c==='S.No'||c==='S.no'))return i;
+  }return -1;
+}
+
+function n(v){const p=parseInt(v);return isNaN(p)?0:p;}
+
+function parseRows(rows,hIdx){
+  const data=[];
+  for(let i=hIdx+1;i<rows.length;i++){
+    const r=rows[i];
+    if(!r[0]||isNaN(parseInt(r[0])))continue;
+    data.push({
+      sno:n(r[0]),camp:(r[1]||'').trim(),district:(r[2]||'').trim(),
+      month:(r[3]||'').trim(),quarter:(r[4]||'').trim(),year:(r[5]||'').trim(),
+      dated:(r[6]||'').trim(),
+      iuds:n(r[9]),implants:n(r[12]),oralCoc:n(r[15]),oralPop:n(r[18]),
+      condoms:n(r[21]),sayana:n(r[24]),ecp:n(r[27]),depo:n(r[30]),
+      magistron:n(r[33]),general:n(r[34]),prenatal:n(r[35]),
+      postnatal:n(r[36]),children:n(r[37]),adult:n(r[38])
+    });
+  }return data;
+}
+
+function populateFilters(data){
+  const years=[...new Set(data.map(r=>r.year))].filter(Boolean).sort();
+  const quarters=[...new Set(data.map(r=>r.quarter))].filter(Boolean).sort();
+  const months=[...new Set(data.map(r=>r.month))].filter(Boolean);
+  const districts=[...new Set(data.map(r=>r.district))].filter(Boolean).sort();
+  const dates=[...new Set(data.map(r=>r.dated))].filter(Boolean).sort();
+  document.getElementById('yearFilter').innerHTML='<option value="ALL">All years</option>'+years.map(y=>`<option>${y}</option>`).join('');
+  document.getElementById('quarterFilter').innerHTML='<option value="ALL">All quarters</option>'+quarters.map(q=>`<option>${q}</option>`).join('');
+  document.getElementById('monthFilter').innerHTML='<option value="ALL">All months</option>'+months.map(m=>`<option>${m}</option>`).join('');
+  document.getElementById('districtFilter').innerHTML='<option value="ALL">All districts</option>'+districts.map(d=>`<option>${d}</option>`).join('');
+  document.getElementById('datedFilter').innerHTML='<option value="ALL">All dates</option>'+dates.map(d=>`<option>${d}</option>`).join('');
+}
+
+function resetFilters(){
+  ['yearFilter','quarterFilter','monthFilter','districtFilter','datedFilter'].forEach(id=>document.getElementById(id).value='ALL');
+  renderAll();
+}
+
+function getFiltered(){
+  const y=document.getElementById('yearFilter').value;
+  const q=document.getElementById('quarterFilter').value;
+  const m=document.getElementById('monthFilter').value;
+  const d=document.getElementById('districtFilter').value;
+  const dt=document.getElementById('datedFilter').value;
+  return ALL_DATA.filter(r=>(y==='ALL'||r.year===y)&&(q==='ALL'||r.quarter===q)&&(m==='ALL'||r.month===m)&&(d==='ALL'||r.district===d)&&(dt==='ALL'||r.dated===dt));
+}
+
+function sum(data,key){return data.reduce((a,r)=>a+(r[key]||0),0);}
+
+function mkChart(id,type,labels,datasets,extraOpts={}){
+  const el=document.getElementById(id);
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(el,{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,color:'#e3f2fd',plugins:{legend:{display:false},...(extraOpts.plugins||{})},scales:extraOpts.scales||{x:{ticks:{color:'#90caf9',font:{size:10},autoSkip:false,maxRotation:30}},y:{ticks:{color:'#90caf9',font:{size:10}},grid:{color:'rgba(255,255,255,0.05)'}}}},...extraOpts}});
+}
+
+function renderAll(){
+  const data=getFiltered();
+  if(!data.length){
+    document.getElementById('metrics').innerHTML='<div class="metric"><div class="metric-label">No data</div><div class="metric-value" style="color:#90caf9">—</div></div>';
+    document.getElementById('campBody').innerHTML='<tr><td colspan="16" style="text-align:center;padding:1.5rem;color:#90caf9;">No data matches current filters</td></tr>';
+    return;
+  }
+
+  const totalFP=sum(data,'iuds')+sum(data,'implants')+sum(data,'oralCoc')+sum(data,'oralPop')+sum(data,'condoms')+sum(data,'sayana')+sum(data,'ecp')+sum(data,'depo')+sum(data,'magistron');
+  const totalMCS=sum(data,'general')+sum(data,'prenatal')+sum(data,'postnatal')+sum(data,'children')+sum(data,'adult');
+
+  const metricColors=['#f093fb','#69f0ae','#64b5f6','#ffb74d','#80deea','#ef9a9a','#fff176','#ce93d8','#ffcc02','#a5d6a7'];
+  const metricLabels=['Total camps','Total FP clients','IUDs','Oral pills CoC','Condoms','Depo inj','MCS clients','Pre-natal','Children','Adults'];
+  const metricVals=[data.length,totalFP,sum(data,'iuds'),sum(data,'oralCoc'),sum(data,'condoms'),sum(data,'depo'),totalMCS,sum(data,'prenatal'),sum(data,'children'),sum(data,'adult')];
+
+  document.getElementById('metrics').innerHTML=metricLabels.map((l,i)=>`
+    <div class="metric">
+      <div class="metric-label">${l}</div>
+      <div class="metric-value" style="color:${metricColors[i]}">${metricVals[i].toLocaleString()}</div>
+    </div>`).join('');
+
+  const districts=[...new Set(ALL_DATA.map(r=>r.district))].filter(Boolean).sort();
+  const dColors=districts.map((_,i)=>DCOLS[i%DCOLS.length]);
+
+  const distFP=districts.map(d=>data.filter(r=>r.district===d).reduce((a,r)=>a+r.iuds+r.implants+r.oralCoc+r.oralPop+r.condoms+r.sayana+r.ecp+r.depo,0));
+  document.getElementById('legend1').innerHTML=districts.map((d,i)=>`<span><span class="legend-dot" style="background:${dColors[i]}"></span>${d}</span>`).join('');
+  mkChart('districtChart','bar',districts,[{data:distFP,backgroundColor:dColors}]);
+
+  const mLabels=['IUDs','Implants','Oral CoC','Oral PoP','Condoms','Sayana','ECP','Depo'];
+  const mVals=[sum(data,'iuds'),sum(data,'implants'),sum(data,'oralCoc'),sum(data,'oralPop'),sum(data,'condoms'),sum(data,'sayana'),sum(data,'ecp'),sum(data,'depo')];
+  document.getElementById('legend2').innerHTML=mLabels.map((m,i)=>`<span><span class="legend-dot" style="background:${MCOLS[i]}"></span>${m} ${mVals[i]}</span>`).join('');
+  mkChart('methodChart','doughnut',mLabels,[{data:mVals,backgroundColor:MCOLS,borderWidth:2,borderColor:'rgba(0,0,0,0.2)'}],{plugins:{legend:{display:false}},cutout:'55%',scales:{}});
+
+  const mcsL=['General','Pre-natal','Post-natal','Children','Adult'];
+  const mcsV=[sum(data,'general'),sum(data,'prenatal'),sum(data,'postnatal'),sum(data,'children'),sum(data,'adult')];
+  document.getElementById('legend3').innerHTML=mcsL.map((m,i)=>`<span><span class="legend-dot" style="background:${MCSCOLS[i]}"></span>${m}</span>`).join('');
+  mkChart('mcsChart','bar',mcsL,[{data:mcsV,backgroundColor:MCSCOLS}]);
+
+  const campCounts=districts.map(d=>data.filter(r=>r.district===d).length);
+  document.getElementById('legend4').innerHTML=districts.map((d,i)=>`<span><span class="legend-dot" style="background:${dColors[i]}"></span>${d}</span>`).join('');
+  mkChart('campsChart','bar',districts,[{data:campCounts,backgroundColor:dColors}],{scales:{x:{ticks:{color:'#90caf9',font:{size:10},autoSkip:false,maxRotation:30}},y:{ticks:{color:'#90caf9',font:{size:10},stepSize:1},grid:{color:'rgba(255,255,255,0.05)'}}}});
+
+  const childByDistrict=districts.map(d=>data.filter(r=>r.district===d).reduce((a,r)=>a+r.children,0));
+  document.getElementById('legend5').innerHTML=districts.map((d,i)=>`<span><span class="legend-dot" style="background:${dColors[i]}"></span>${d}: ${childByDistrict[i]}</span>`).join('');
+  mkChart('childrenDistrictChart','bar',districts,[{data:childByDistrict,backgroundColor:dColors}]);
+
+  const months=[...new Set(data.map(r=>r.month))].filter(Boolean).sort((a,b)=>MONTHS.indexOf(a)-MONTHS.indexOf(b));
+  const childByMonth=months.map(m=>data.filter(r=>r.month===m).reduce((a,r)=>a+r.children,0));
+  document.getElementById('legend6').innerHTML=months.map((m,i)=>`<span><span class="legend-dot" style="background:${DCOLS[i%DCOLS.length]}"></span>${m}: ${childByMonth[i]}</span>`).join('');
+  mkChart('childrenMonthChart','line',months,[{data:childByMonth,borderColor:'#f093fb',backgroundColor:'rgba(240,83,251,0.1)',tension:0.3,fill:true,pointBackgroundColor:'#f093fb',pointRadius:5}]);
+
+  const adultByDistrict=districts.map(d=>data.filter(r=>r.district===d).reduce((a,r)=>a+r.adult,0));
+  document.getElementById('legend7').innerHTML=`<span><span class="legend-dot" style="background:#ffb74d"></span>Children</span><span><span class="legend-dot" style="background:#ce93d8"></span>Adults</span>`;
+  mkChart('childrenAdultsChart','bar',districts,[{label:'Children',data:childByDistrict,backgroundColor:'#ffb74d'},{label:'Adults',data:adultByDistrict,backgroundColor:'#ce93d8'}]);
+
+  document.getElementById('campBody').innerHTML=data.map(r=>`<tr>
+    <td>${r.sno}</td><td>${r.camp}</td>
+    <td><span class="badge">${r.district}</span></td>
+    <td>${r.month}</td><td>${r.year}</td><td>${r.dated}</td>
+    <td>${r.iuds}</td><td>${r.implants}</td><td>${r.oralCoc}</td>
+    <td>${r.condoms}</td><td>${r.depo}</td><td>${r.general}</td>
+    <td>${r.prenatal}</td><td>${r.postnatal}</td>
+    <td><span class="badge-green">${r.children}</span></td>
+    <td>${r.adult}</td>
+  </tr>`).join('');
+}
+
+async function loadData(){
+  const btn=document.getElementById('refreshBtn');
+  const status=document.getElementById('statusMsg');
+  btn.disabled=true;btn.textContent='Loading...';
+  status.className='status';status.textContent='Fetching latest data...';
+  try{
+    const res=await fetch('http://127.0.0.1:5000/data');
+    const json=await res.json();
+    const rows=parseCSV(json.csv);
+    const hIdx=findHeaderRow(rows);
+    if(hIdx<0)throw new Error('Header row not found');
+    ALL_DATA=parseRows(rows,hIdx);
+    populateFilters(ALL_DATA);
+    renderAll();
+    const now=new Date().toLocaleTimeString();
+    status.className='status ok';
+    status.textContent=`Last refreshed: ${now} · ${ALL_DATA.length} camps loaded`;
+  }catch(err){
+    status.className='status error';
+    status.textContent='Error: '+err.message;
+  }finally{
+    btn.disabled=false;btn.textContent='⟳ Refresh';
+  }
+}
+loadData();
+</script>
+</body>
+</html>
+HTMLEOFpython3 server.py

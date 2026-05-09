@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSU Outreach Camps — GB Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Arial,sans-serif;}
+body{background:#f0f4f8;min-height:100vh;}
+
+/* NAV */
+.navbar{background:linear-gradient(90deg,#0d47a1,#1565c0,#1976d2);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;box-shadow:0 2px 10px rgba(0,0,0,0.2);position:sticky;top:0;z-index:100;}
+.nav-brand{display:flex;align-items:center;gap:10px;}
+.nav-logo{width:36px;height:36px;background:white;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.nav-title{color:white;font-size:15px;font-weight:700;letter-spacing:0.3px;}
+.nav-subtitle{color:#90caf9;font-size:11px;}
+.nav-actions{display:flex;gap:8px;align-items:center;}
+.btn-refresh{padding:7px 16px;background:linear-gradient(135deg,#66bb6a,#43a047);color:white;border:none;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(76,175,80,0.4);}
+.btn-refresh:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(76,175,80,0.5);}
+.btn-refresh:disabled{background:#aaa;box-shadow:none;transform:none;}
+.btn-excel{padding:7px 14px;background:linear-gradient(135deg,#388e3c,#2e7d32);color:white;border:none;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;}
+.btn-pdf{padding:7px 14px;background:linear-gradient(135deg,#e53935,#c62828);color:white;border:none;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;}
+.btn-print{padding:7px 14px;background:linear-gradient(135deg,#7b1fa2,#6a1b9a);color:white;border:none;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;}
+.btn-reset{padding:7px 14px;background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:20px;font-size:12px;cursor:pointer;}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0d47a1 0%,#1565c0 50%,#0288d1 100%);padding:28px 24px 60px;position:relative;overflow:hidden;}
+.hero::before{content:"";position:absolute;top:-50%;right:-10%;width:400px;height:400px;background:rgba(255,255,255,0.05);border-radius:50%;}
+.hero::after{content:"";position:absolute;bottom:-30%;left:5%;width:300px;height:300px;background:rgba(255,255,255,0.03);border-radius:50%;}
+.hero-content{position:relative;z-index:1;}
+.hero h2{color:white;font-size:24px;font-weight:700;margin-bottom:4px;}
+.hero p{color:#90caf9;font-size:13px;margin-bottom:20px;}
+.status-bar{display:flex;align-items:center;gap:8px;}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#69f0ae;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.status-text{color:#69f0ae;font-size:12px;font-weight:500;}
+
+/* FILTERS */
+.filters-card{background:white;margin:-30px 24px 20px;border-radius:16px;padding:16px 20px;box-shadow:0 4px 20px rgba(0,0,0,0.1);display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.filter-group{display:flex;flex-direction:column;gap:3px;}
+.filter-label{font-size:10px;color:#90a4ae;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+select{font-size:12px;padding:6px 10px;border:1.5px solid #e3f2fd;border-radius:8px;background:#f8fbff;color:#0d47a1;cursor:pointer;outline:none;font-weight:500;}
+select:focus{border-color:#1976d2;}
+
+/* CONTENT */
+.content{padding:0 24px 24px;}
+
+/* METRIC CARDS */
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;}
+.metric{background:white;border-radius:14px;padding:14px 16px;box-shadow:0 2px 10px rgba(0,0,0,0.06);border-left:4px solid #1976d2;transition:transform 0.2s,box-shadow 0.2s;}
+.metric:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.1);}
+.metric-icon{font-size:20px;margin-bottom:6px;}
+.metric-label{font-size:10px;color:#90a4ae;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+.metric-value{font-size:22px;font-weight:700;color:#0d47a1;}
+
+/* SECTION */
+.section-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;margin-top:20px;}
+.section-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.section-title{font-size:13px;font-weight:700;color:#1565c0;text-transform:uppercase;letter-spacing:0.5px;}
+.section-line{flex:1;height:1px;background:linear-gradient(90deg,#90caf9,transparent);}
+
+/* CHARTS */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.chart-row-full{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:14px;}
+.chart-box{background:white;border-radius:14px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,0.06);}
+.chart-title{font-size:12px;font-weight:600;color:#37474f;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.chart-badge{font-size:10px;background:#e3f2fd;color:#1565c0;padding:2px 8px;border-radius:10px;font-weight:500;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;font-size:10px;color:#78909c;}
+.legend span{display:flex;align-items:center;gap:3px;}
+.legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+
+/* FUNNEL */
+.funnel-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.funnel-label{font-size:11px;color:#37474f;font-weight:600;width:90px;text-align:right;flex-shrink:0;}
+.funnel-bar-wrap{flex:1;background:#e3f2fd;border-radius:20px;height:24px;overflow:hidden;}
+.funnel-bar{height:100%;border-radius:20px;display:flex;align-items:center;padding-left:10px;font-size:10px;font-weight:700;color:#fff;transition:width 0.6s ease;}
+.funnel-pct{font-size:12px;color:#1565c0;font-weight:700;width:40px;flex-shrink:0;}
+.funnel-count{font-size:11px;color:#90a4ae;width:55px;flex-shrink:0;}
+
+/* TABLE */
+.table-box{background:white;border-radius:14px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,0.06);overflow-x:auto;margin-bottom:20px;}
+.table-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.table-title{font-size:12px;font-weight:700;color:#37474f;}
+.table-count{font-size:11px;color:#90a4ae;background:#f5f5f5;padding:3px 10px;border-radius:10px;}
+table{width:100%;border-collapse:collapse;font-size:11px;}
+th{text-align:left;font-weight:600;color:#90a4ae;font-size:10px;padding:8px 8px;border-bottom:2px solid #f5f5f5;white-space:nowrap;text-transform:uppercase;letter-spacing:0.3px;}
+td{padding:8px 8px;color:#37474f;border-bottom:1px solid #fafafa;white-space:nowrap;}
+tr:hover td{background:#f8fbff;}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;background:#e3f2fd;color:#1565c0;}
+.badge-green{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;background:#e8f5e9;color:#2e7d32;}
+
+/* FOOTER */
+.footer{background:white;text-align:center;padding:16px;font-size:11px;color:#90a4ae;border-top:1px solid #f5f5f5;margin-top:10px;}
+
+@media print{
+  .navbar,.filters-card,.btn-refresh,.btn-reset,.btn-excel,.btn-pdf,.btn-print{display:none!important;}
+  .hero{padding:16px;}
+  body{background:white;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-logo">🏥</div>
+    <div>
+      <div class="nav-title">MSU Outreach Camps Dashboard</div>
+      <div class="nav-subtitle">Gilgit-Baltistan · Real-time M&E System</div>
+    </div>
+  </div>
+  <div class="nav-actions">
+    <button class="btn-reset" onclick="resetFilters()">✕ Reset</button>
+    <button class="btn-excel" onclick="exportExcel()">⬇ Excel</button>
+    <button class="btn-pdf" onclick="exportPDF()">⬇ PDF</button>
+    <button class="btn-print" onclick="printReport()">🖨 Print</button><button style="padding:7px 14px;background:linear-gradient(135deg,#1565c0,#0d47a1);color:white;border:none;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;margin-left:8px;" onclick="exportWord()">📄 Word</button>
+    <button class="btn-refresh" id="refreshBtn" onclick="loadData()">⟳ Refresh</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-content">
+    <h2>Mobile Service Unit — Outreach Camps</h2>
+    <p>Family Planning & Mother Child Services · Gilgit-Baltistan Region</p>
+    <div class="status-bar">
+      <div class="status-dot"></div>
+      <div class="status-text" id="statusMsg">Click Refresh to load latest data</div>
+    </div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-card">
+  <div class="filter-group"><div class="filter-label">Year</div><select id="yearFilter" onchange="renderAll()"></select></div>
+  <div class="filter-group"><div class="filter-label">Quarter</div><select id="quarterFilter" onchange="renderAll()"></select></div>
+  <div class="filter-group"><div class="filter-label">Month</div><select id="monthFilter" onchange="renderAll()"></select></div>
+  <div class="filter-group"><div class="filter-label">District</div><select id="districtFilter" onchange="renderAll()"></select></div>
+  <div class="filter-group"><div class="filter-label">Date</div><select id="datedFilter" onchange="renderAll()"></select></div>
+  <div class="filter-group"><div class="filter-label">FP Method</div><select id="fpFilter" onchange="renderAll()"></select></div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- SUMMARY -->
+  <div class="section-header"><div class="section-icon" style="background:#e3f2fd">📊</div><div class="section-title">Summary</div><div class="section-line"></div></div>
+  <div class="metric-grid" id="metrics"></div>
+
+  <!-- FP SERVICES -->
+  <div class="section-header"><div class="section-icon" style="background:#e8f5e9">💊</div><div class="section-title">Family Planning Services</div><div class="section-line"></div></div>
+  <div class="chart-row">
+    <div class="chart-box"><div class="chart-title">FP clients by district <span class="chart-badge">Bar</span></div><div class="legend" id="legend1"></div><div style="position:relative;height:180px;"><canvas id="districtChart"></canvas></div></div>
+    <div class="chart-box"><div class="chart-title">Method mix <span class="chart-badge">Doughnut</span></div><div class="legend" id="legend2"></div><div style="position:relative;height:180px;"><canvas id="methodChart"></canvas></div></div>
+  </div>
+  <div class="chart-row">
+    <div class="chart-box"><div class="chart-title">FP methods by district <span class="chart-badge">Grouped</span></div><div class="legend" id="legend8"></div><div style="position:relative;height:180px;"><canvas id="fpDistrictChart"></canvas></div></div>
+    <div class="chart-box"><div class="chart-title">FP methods by month <span class="chart-badge">Trend</span></div><div class="legend" id="legend9"></div><div style="position:relative;height:180px;"><canvas id="fpMonthChart"></canvas></div></div>
+  </div>
+
+  <!-- MCS -->
+  <div class="section-header"><div class="section-icon" style="background:#fce4ec">🤱</div><div class="section-title">Mother & Child Services</div><div class="section-line"></div></div>
+  <div class="chart-row">
+    <div class="chart-box"><div class="chart-title">MCS breakdown <span class="chart-badge">Bar</span></div><div class="legend" id="legend3"></div><div style="position:relative;height:180px;"><canvas id="mcsChart"></canvas></div></div>
+    <div class="chart-box"><div class="chart-title">Camps per district <span class="chart-badge">Bar</span></div><div class="legend" id="legend4"></div><div style="position:relative;height:180px;"><canvas id="campsChart"></canvas></div></div>
+  </div>
+
+  <!-- CHILDREN -->
+  <div class="section-header"><div class="section-icon" style="background:#fff8e1">👶</div><div class="section-title">Children Breakdown</div><div class="section-line"></div></div>
+  <div class="chart-row">
+    <div class="chart-box"><div class="chart-title">Children by district <span class="chart-badge">Bar</span></div><div class="legend" id="legend5"></div><div style="position:relative;height:180px;"><canvas id="childrenDistrictChart"></canvas></div></div>
+    <div class="chart-box"><div class="chart-title">Children by month <span class="chart-badge">Trend</span></div><div class="legend" id="legend6"></div><div style="position:relative;height:180px;"><canvas id="childrenMonthChart"></canvas></div></div>
+  </div>
+  <div class="chart-row-full">
+    <div class="chart-box"><div class="chart-title">Children vs Adults by district <span class="chart-badge">Grouped</span></div><div class="legend" id="legend7"></div><div style="position:relative;height:180px;"><canvas id="childrenAdultsChart"></canvas></div></div>
+  </div>
+
+  <!-- CAMP DISTRIBUTION -->
+  <div class="section-header"><div class="section-icon" style="background:#ede7f6">🏕️</div><div class="section-title">Camp Distribution by District</div><div class="section-line"></div></div>
+  <div class="chart-row-full">
+    <div class="chart-box"><div class="chart-title">Camps per district — descending order with percentage</div><div id="funnelChart" style="padding:8px 0;"></div></div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="section-header"><div class="section-icon" style="background:#e0f2f1">📋</div><div class="section-title">Camp Detail</div><div class="section-line"></div></div>
+  <div class="table-box">
+    <div class="table-header"><div class="table-title">All camps</div><div class="table-count" id="tableCount">0 records</div></div>
+    <table>
+      <thead><tr><th>#</th><th>Camp</th><th>District</th><th>Month</th><th>Year</th><th>Dated</th><th>IUDs</th><th>Implants</th><th>Oral CoC</th><th>Condoms</th><th>Depo</th><th>General</th><th>Pre-natal</th><th>Post-natal</th><th>Children</th><th>Adults</th></tr></thead>
+      <tbody id="campBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">MSU Outreach Camps Dashboard · Gilgit-Baltistan · Built with Claude AI</div>
+
+<script>
+var DCOLS=["#42a5f5","#66bb6a","#ffa726","#ef5350","#ab47bc","#26c6da","#ffee58","#8d6e63"];
+var MCOLS=["#42a5f5","#66bb6a","#ffa726","#ef5350","#ab47bc","#26c6da","#ffee58","#8d6e63"];
+var MCSCOLS=["#42a5f5","#66bb6a","#ab47bc","#ffa726","#ef5350"];
+var MONTHS=["December","January","February","March","April","May","June","July","August","September","October","November"];
+var ALL_DATA=[];
+var charts={};
+var FP_KEYS=["iuds","implants","oralCoc","oralPop","condoms","sayana","ecp","depo"];
+var FP_LABELS=["IUDs","Implants","Oral CoC","Oral PoP","Condoms","Sayana","ECP","Depo"];
+var METRIC_COLORS=["#1976d2","#43a047","#42a5f5","#ffa726","#26c6da","#ef5350","#ab47bc","#e91e63","#ff9800","#66bb6a"];
+var METRIC_BORDERS=["#1976d2","#43a047","#1976d2","#f57c00","#0097a7","#c62828","#7b1fa2","#c2185b","#e65100","#388e3c"];
+
+function parseCSV(text){
+  return text.trim().split("\n").map(function(line){
+    var cols=[];var cur="";var inQ=false;
+    for(var i=0;i<line.length;i++){
+      if(line[i]===chr(34)){inQ=!inQ;}
+      else if(line[i]===","&&!inQ){cols.push(cur.trim());cur="";}
+      else{cur+=line[i];}
+    }
+    cols.push(cur.trim());return cols;
+  });
+}
+
+function chr(n){return String.fromCharCode(n);}
+
+function findHeaderRow(rows){
+  for(var i=0;i<rows.length;i++){
+    if(rows[i].some(function(c){return c==="S.No"||c==="S.no";}))return i;
+  }return -1;
+}
+
+function n(v){var p=parseInt(v);return isNaN(p)?0:p;}
+
+function parseRows(rows,hIdx){
+  var data=[];
+  for(var i=hIdx+1;i<rows.length;i++){
+    var r=rows[i];
+    if(!r[0]||isNaN(parseInt(r[0])))continue;
+    data.push({sno:n(r[0]),camp:(r[1]||"").trim(),district:(r[2]||"").trim(),month:(r[3]||"").trim().replace(/\s+/g,""),quarter:(r[4]||"").trim(),year:(r[5]||"").trim(),dated:(r[6]||"").trim(),iuds:n(r[9]),implants:n(r[12]),oralCoc:n(r[15]),oralPop:n(r[18]),condoms:n(r[21]),sayana:n(r[24]),ecp:n(r[27]),depo:n(r[30]),magistron:n(r[33]),general:n(r[34]),prenatal:n(r[35]),postnatal:n(r[36]),children:n(r[37]),adult:n(r[38])});
+  }return data;
+}
+
+function populateFilters(data){
+  var years=[...new Set(data.map(function(r){return r.year;}))].filter(Boolean).sort();
+  var quarters=[...new Set(data.map(function(r){return r.quarter;}))].filter(Boolean).sort();
+  var months=[...new Set(data.map(function(r){return r.month;}))].filter(Boolean);
+  var districts=[...new Set(data.map(function(r){return r.district;}))].filter(Boolean).sort();
+  var dates=[...new Set(data.map(function(r){return r.dated;}))].filter(Boolean).sort();
+  document.getElementById("yearFilter").innerHTML="<option value=ALL>All years</option>"+years.map(function(y){return "<option>"+y+"</option>";}).join("");
+  document.getElementById("quarterFilter").innerHTML="<option value=ALL>All quarters</option>"+quarters.map(function(q){return "<option>"+q+"</option>";}).join("");
+  document.getElementById("monthFilter").innerHTML="<option value=ALL>All months</option>"+months.map(function(m){return "<option>"+m+"</option>";}).join("");
+  document.getElementById("districtFilter").innerHTML="<option value=ALL>All districts</option>"+districts.map(function(d){return "<option>"+d+"</option>";}).join("");
+  document.getElementById("datedFilter").innerHTML="<option value=ALL>All dates</option>"+dates.map(function(d){return "<option>"+d+"</option>";}).join("");
+  document.getElementById("fpFilter").innerHTML="<option value=ALL>All FP methods</option>"+FP_LABELS.map(function(l,i){return "<option value="+FP_KEYS[i]+">"+l+"</option>";}).join("");
+}
+
+function resetFilters(){
+  ["yearFilter","quarterFilter","monthFilter","districtFilter","datedFilter","fpFilter"].forEach(function(id){document.getElementById(id).value="ALL";});
+  renderAll();
+}
+
+function getFiltered(){
+  var y=document.getElementById("yearFilter").value;
+  var q=document.getElementById("quarterFilter").value;
+  var m=document.getElementById("monthFilter").value;
+  var d=document.getElementById("districtFilter").value;
+  var dt=document.getElementById("datedFilter").value;
+  return ALL_DATA.filter(function(r){return (y==="ALL"||r.year===y)&&(q==="ALL"||r.quarter===q)&&(m==="ALL"||r.month===m)&&(d==="ALL"||r.district===d)&&(dt==="ALL"||r.dated===dt);});
+}
+
+function getActiveFP(){
+  var fp=document.getElementById("fpFilter").value;
+  return fp==="ALL"?FP_KEYS:[fp];
+}
+
+function sum(data,key){return data.reduce(function(a,r){return a+(r[key]||0);},0);}
+
+function mkChart(id,type,labels,datasets,extraOpts){
+  extraOpts=extraOpts||{};
+  if(charts[id])charts[id].destroy();
+  var scalesOpt=type==="doughnut"?{}:{x:{ticks:{color:"#90a4ae",font:{size:9},autoSkip:false,maxRotation:30},grid:{color:"rgba(0,0,0,0.03)"}},y:{ticks:{color:"#90a4ae",font:{size:9}},grid:{color:"rgba(0,0,0,0.05)"}}};
+  charts[id]=new Chart(document.getElementById(id),{type:type,data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"rgba(13,71,161,0.9)",padding:10,cornerRadius:8}},scales:extraOpts.scales!==undefined?extraOpts.scales:scalesOpt}});
+}
+
+function renderFunnel(data){
+  var districts=[...new Set(ALL_DATA.map(function(r){return r.district;}))].filter(Boolean);
+  var counts=districts.map(function(d){return {district:d,count:data.filter(function(r){return r.district===d;}).length};});
+  counts.sort(function(a,b){return b.count-a.count;});
+  var total=counts.reduce(function(a,c){return a+c.count;},0);
+  var colors=["#42a5f5","#66bb6a","#ffa726","#ef5350","#ab47bc","#26c6da","#ffee58","#8d6e63"];
+  if(total===0){document.getElementById("funnelChart").innerHTML="<p style=color:#90a4ae;text-align:center;padding:1rem>No data</p>";return;}
+  document.getElementById("funnelChart").innerHTML=counts.map(function(c,i){
+    var pct=total>0?Math.round((c.count/total)*100):0;
+    var width=total>0?Math.round((c.count/counts[0].count)*100):0;
+    return "<div class=funnel-row><div class=funnel-label>"+c.district+"</div><div class=funnel-bar-wrap><div class=funnel-bar style=width:"+width+"%;background:"+colors[i%colors.length]+">"+c.count+" camps</div></div><div class=funnel-pct>"+pct+"%</div><div class=funnel-count>("+c.count+" camps)</div></div>";
+  }).join("");
+}
+
+function renderAll(){
+  var data=getFiltered();
+  var activeFP=getActiveFP();
+  if(!data.length){
+    document.getElementById("metrics").innerHTML="<div class=metric><div class=metric-label>No data</div><div class=metric-value style=color:#1565c0>0</div></div>";
+    document.getElementById("campBody").innerHTML="<tr><td colspan=16 style=text-align:center;padding:1.5rem;color:#90a4ae>No data matches current filters</td></tr>";
+    return;
+  }
+  var totalFP=data.reduce(function(a,r){return a+activeFP.reduce(function(b,k){return b+(r[k]||0);},0);},0);
+  var totalMCS=sum(data,"general")+sum(data,"prenatal")+sum(data,"postnatal")+sum(data,"children")+sum(data,"adult");
+  var mLabels=["Total camps","Total FP","IUDs","Oral CoC","Condoms","Depo","MCS clients","Pre-natal","Children","Adults"];
+  var mVals=[data.length,totalFP,sum(data,"iuds"),sum(data,"oralCoc"),sum(data,"condoms"),sum(data,"depo"),totalMCS,sum(data,"prenatal"),sum(data,"children"),sum(data,"adult")];
+  var mIcons=["🏕️","💊","💉","💊","🛡️","💉","🤱","🤰","👶","👥"];
+  document.getElementById("metrics").innerHTML=mLabels.map(function(l,i){return "<div class=metric style=border-left-color:"+METRIC_BORDERS[i]+"><div class=metric-icon>"+mIcons[i]+"</div><div class=metric-label>"+l+"</div><div class=metric-value style=color:"+METRIC_COLORS[i]+">"+mVals[i].toLocaleString()+"</div></div>";}).join("");
+
+  var districts=[...new Set(ALL_DATA.map(function(r){return r.district;}))].filter(Boolean).sort();
+  var dColors=districts.map(function(_,i){return DCOLS[i%DCOLS.length];});
+
+  var distFP=districts.map(function(d){return data.filter(function(r){return r.district===d;}).reduce(function(a,r){return a+activeFP.reduce(function(b,k){return b+(r[k]||0);},0);},0);});
+  document.getElementById("legend1").innerHTML=districts.map(function(d,i){return "<span><span class=legend-dot style=background:"+dColors[i]+"></span>"+d+"</span>";}).join("");
+  mkChart("districtChart","bar",districts,[{data:distFP,backgroundColor:dColors,borderRadius:4}]);
+
+  var fpV=FP_KEYS.map(function(k){return sum(data,k);});
+  document.getElementById("legend2").innerHTML=FP_LABELS.map(function(m,i){return "<span><span class=legend-dot style=background:"+MCOLS[i]+"></span>"+m+" "+fpV[i]+"</span>";}).join("");
+  mkChart("methodChart","doughnut",FP_LABELS,[{data:fpV,backgroundColor:MCOLS,borderWidth:2,borderColor:"rgba(255,255,255,0.8)"}],{scales:{}});
+
+  var activeFPLabels=activeFP.map(function(k){return FP_LABELS[FP_KEYS.indexOf(k)];});
+  var activeFPColors=activeFP.map(function(k){return MCOLS[FP_KEYS.indexOf(k)];});
+  var fpDistDatasets=activeFP.map(function(k,i){return {label:activeFPLabels[i],data:districts.map(function(d){return data.filter(function(r){return r.district===d;}).reduce(function(a,r){return a+(r[k]||0);},0);}),backgroundColor:activeFPColors[i],borderRadius:3};});
+  document.getElementById("legend8").innerHTML=activeFPLabels.map(function(l,i){return "<span><span class=legend-dot style=background:"+activeFPColors[i]+"></span>"+l+"</span>";}).join("");
+  mkChart("fpDistrictChart","bar",districts,fpDistDatasets);
+
+  var months=[...new Set(data.map(function(r){return r.month;}))].filter(Boolean).sort(function(a,b){return MONTHS.indexOf(a)-MONTHS.indexOf(b);});
+  var fpMonthDatasets=activeFP.map(function(k,i){return {label:activeFPLabels[i],data:months.map(function(m){return data.filter(function(r){return r.month===m;}).reduce(function(a,r){return a+(r[k]||0);},0);}),borderColor:activeFPColors[i],backgroundColor:activeFPColors[i]+"33",tension:0.4,fill:false,pointRadius:4,pointBackgroundColor:activeFPColors[i]};});
+  document.getElementById("legend9").innerHTML=activeFPLabels.map(function(l,i){return "<span><span class=legend-dot style=background:"+activeFPColors[i]+"></span>"+l+"</span>";}).join("");
+  mkChart("fpMonthChart","line",months,fpMonthDatasets);
+
+  var mcsL=["General","Pre-natal","Post-natal","Children","Adult"];
+  var mcsV=[sum(data,"general"),sum(data,"prenatal"),sum(data,"postnatal"),sum(data,"children"),sum(data,"adult")];
+  document.getElementById("legend3").innerHTML=mcsL.map(function(m,i){return "<span><span class=legend-dot style=background:"+MCSCOLS[i]+"></span>"+m+"</span>";}).join("");
+  mkChart("mcsChart","bar",mcsL,[{data:mcsV,backgroundColor:MCSCOLS,borderRadius:4}]);
+
+  var campCounts=districts.map(function(d){return data.filter(function(r){return r.district===d;}).length;});
+  document.getElementById("legend4").innerHTML=districts.map(function(d,i){return "<span><span class=legend-dot style=background:"+dColors[i]+"></span>"+d+"</span>";}).join("");
+  mkChart("campsChart","bar",districts,[{data:campCounts,backgroundColor:dColors,borderRadius:4}]);
+
+  var childByDistrict=districts.map(function(d){return data.filter(function(r){return r.district===d;}).reduce(function(a,r){return a+r.children;},0);});
+  document.getElementById("legend5").innerHTML=districts.map(function(d,i){return "<span><span class=legend-dot style=background:"+dColors[i]+"></span>"+d+": "+childByDistrict[i]+"</span>";}).join("");
+  mkChart("childrenDistrictChart","bar",districts,[{data:childByDistrict,backgroundColor:dColors,borderRadius:4}]);
+
+  var childByMonth=months.map(function(m){return data.filter(function(r){return r.month===m;}).reduce(function(a,r){return a+r.children;},0);});
+  document.getElementById("legend6").innerHTML=months.map(function(m,i){return "<span><span class=legend-dot style=background:"+DCOLS[i%DCOLS.length]+"></span>"+m+": "+childByMonth[i]+"</span>";}).join("");
+  mkChart("childrenMonthChart","line",months,[{data:childByMonth,borderColor:"#43a047",backgroundColor:"rgba(67,160,71,0.1)",tension:0.4,fill:true,pointBackgroundColor:"#43a047",pointRadius:4}]);
+
+  var adultByDistrict=districts.map(function(d){return data.filter(function(r){return r.district===d;}).reduce(function(a,r){return a+r.adult;},0);});
+  document.getElementById("legend7").innerHTML="<span><span class=legend-dot style=background:#ffa726></span>Children</span><span><span class=legend-dot style=background:#ab47bc></span>Adults</span>";
+  mkChart("childrenAdultsChart","bar",districts,[{label:"Children",data:childByDistrict,backgroundColor:"#ffa726",borderRadius:4},{label:"Adults",data:adultByDistrict,backgroundColor:"#ab47bc",borderRadius:4}]);
+
+  renderFunnel(data);
+
+  document.getElementById("tableCount").textContent=data.length+" records";
+  document.getElementById("campBody").innerHTML=data.map(function(r){return "<tr><td>"+r.sno+"</td><td>"+r.camp+"</td><td><span class=badge>"+r.district+"</span></td><td>"+r.month+"</td><td>"+r.year+"</td><td>"+r.dated+"</td><td>"+r.iuds+"</td><td>"+r.implants+"</td><td>"+r.oralCoc+"</td><td>"+r.condoms+"</td><td>"+r.depo+"</td><td>"+r.general+"</td><td>"+r.prenatal+"</td><td>"+r.postnatal+"</td><td><span class=badge-green>"+r.children+"</span></td><td>"+r.adult+"</td></tr>";}).join("");
+}
+
+function exportExcel(){
+  var data=getFiltered();
+  if(!data.length){alert("No data to export");return;}
+  var rows=[["#","Camp","District","Month","Year","Dated","IUDs","Implants","Oral CoC","Oral PoP","Condoms","Sayana","ECP","Depo","Magistron","General","Pre-natal","Post-natal","Children","Adults"]];
+  data.forEach(function(r){rows.push([r.sno,r.camp,r.district,r.month,r.year,r.dated,r.iuds,r.implants,r.oralCoc,r.oralPop,r.condoms,r.sayana,r.ecp,r.depo,r.magistron,r.general,r.prenatal,r.postnatal,r.children,r.adult]);});
+  var wb=XLSX.utils.book_new();
+  var ws=XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb,ws,"MSU Camps");
+  XLSX.writeFile(wb,"MSU_Dashboard_"+new Date().toLocaleDateString().replace(/\//g,"-")+".xlsx");
+}
+
+function exportPDF(){
+  var btns=document.querySelectorAll(".btn-refresh,.btn-reset,.btn-excel,.btn-pdf,.btn-print");
+  btns.forEach(function(b){b.style.display="none";});
+  html2canvas(document.body,{scale:0.75,useCORS:true,backgroundColor:"#f0f4f8"}).then(function(canvas){
+    var pdf=new jspdf.jsPDF("p","mm","a4");
+    var pw=pdf.internal.pageSize.getWidth();
+    var ph=pdf.internal.pageSize.getHeight();
+    var iw=pw;
+    var ih=(canvas.height*iw)/canvas.width;
+    var hl=ih;var pos=0;
+    pdf.addImage(canvas.toDataURL("image/png"),"PNG",0,pos,iw,ih);
+    hl-=ph;
+    while(hl>0){pos=hl-ih;pdf.addPage();pdf.addImage(canvas.toDataURL("image/png"),"PNG",0,pos,iw,ih);hl-=ph;}
+    pdf.save("MSU_Dashboard_"+new Date().toLocaleDateString().replace(/\//g,"-")+".pdf");
+    btns.forEach(function(b){b.style.display="";});
+  });
+}
+
+function exportWord(){
+  var data=getFiltered();
+  if(!data.length){alert('No data to export');return;}
+  var now=new Date().toLocaleDateString();
+  var totalFP=data.reduce(function(a,r){return a+r.iuds+r.implants+r.oralCoc+r.oralPop+r.condoms+r.sayana+r.ecp+r.depo;},0);
+  var totalMCS=data.reduce(function(a,r){return a+r.general+r.prenatal+r.postnatal+r.children+r.adult;},0);
+  var iuds=data.reduce(function(a,r){return a+r.iuds;},0);
+  var implants=data.reduce(function(a,r){return a+r.implants;},0);
+  var coc=data.reduce(function(a,r){return a+r.oralCoc;},0);
+  var condoms=data.reduce(function(a,r){return a+r.condoms;},0);
+  var depo=data.reduce(function(a,r){return a+r.depo;},0);
+  var prenatal=data.reduce(function(a,r){return a+r.prenatal;},0);
+  var postnatal=data.reduce(function(a,r){return a+r.postnatal;},0);
+  var children=data.reduce(function(a,r){return a+r.children;},0);
+  var adults=data.reduce(function(a,r){return a+r.adult;},0);
+  var general=data.reduce(function(a,r){return a+r.general;},0);
+  var rows=data.map(function(r){return '<tr><td>'+r.sno+'</td><td>'+r.camp+'</td><td>'+r.district+'</td><td>'+r.month+'</td><td>'+r.year+'</td><td>'+r.iuds+'</td><td>'+r.implants+'</td><td>'+r.oralCoc+'</td><td>'+r.condoms+'</td><td>'+r.depo+'</td><td>'+r.general+'</td><td>'+r.prenatal+'</td><td>'+r.postnatal+'</td><td>'+r.children+'</td><td>'+r.adult+'</td></tr>';}).join('');
+  var doc='<html><head><meta charset=utf-8>';
+  doc+='<style>body{font-family:Calibri,Arial;font-size:11pt;margin:2cm;}';
+  doc+='h1{color:#0d47a1;font-size:18pt;margin-bottom:4px;}';
+  doc+='h2{color:#1565c0;font-size:13pt;margin-top:24px;margin-bottom:8px;border-bottom:2px solid #1565c0;padding-bottom:4px;}';
+  doc+='p{font-size:10pt;color:#555;margin-bottom:12px;}';
+  doc+='table{width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:16px;}';
+  doc+='th{background:#0d47a1;color:white;padding:8px 10px;text-align:left;font-size:10pt;}';
+  doc+='td{padding:7px 10px;border:1px solid #e3f2fd;}';
+  doc+='tr:nth-child(even) td{background:#f5f9ff;}';
+  doc+='.footer{margin-top:30px;font-size:9pt;color:#90a4ae;border-top:1px solid #e3f2fd;padding-top:10px;text-align:center;}';
+  doc+='</style></head><body>';
+  doc+='<h1>MSU Outreach Camps — GB Report</h1>';
+  doc+='<p>Gilgit-Baltistan Region &nbsp;|&nbsp; Generated: '+now+' &nbsp;|&nbsp; Total camps in report: '+data.length+'</p>';
+  doc+='<h2>1. Family Planning Summary</h2>';
+  doc+='<table>';
+  doc+='<tr><th>Indicator</th><th>Total</th></tr>';
+  doc+='<tr><td>Total FP Clients</td><td>'+totalFP+'</td></tr>';
+  doc+='<tr><td>IUDs</td><td>'+iuds+'</td></tr>';
+  doc+='<tr><td>Implants</td><td>'+implants+'</td></tr>';
+  doc+='<tr><td>Oral Pills CoC</td><td>'+coc+'</td></tr>';
+  doc+='<tr><td>Condoms</td><td>'+condoms+'</td></tr>';
+  doc+='<tr><td>Depo Injection</td><td>'+depo+'</td></tr>';
+  doc+='</table>';
+  doc+='<h2>2. Mother & Child Services Summary</h2>';
+  doc+='<table>';
+  doc+='<tr><th>Indicator</th><th>Total</th></tr>';
+  doc+='<tr><td>Total MCS Clients</td><td>'+totalMCS+'</td></tr>';
+  doc+='<tr><td>General Patients</td><td>'+general+'</td></tr>';
+  doc+='<tr><td>Pre-Natal</td><td>'+prenatal+'</td></tr>';
+  doc+='<tr><td>Post-Natal</td><td>'+postnatal+'</td></tr>';
+  doc+='<tr><td>Children</td><td>'+children+'</td></tr>';
+  doc+='<tr><td>Adults</td><td>'+adults+'</td></tr>';
+  doc+='</table>';
+  doc+='<h2>3. Camp Detail</h2>';
+  doc+='<table>';
+  doc+='<thead><tr><th>#</th><th>Camp</th><th>District</th><th>Month</th><th>Year</th><th>IUDs</th><th>Implants</th><th>Oral CoC</th><th>Condoms</th><th>Depo</th><th>General</th><th>Pre-natal</th><th>Post-natal</th><th>Children</th><th>Adults</th></tr></thead>';
+  doc+='<tbody>'+rows+'</tbody></table>';
+  doc+='<div class=footer>MSU Outreach Camps Dashboard &nbsp;|&nbsp; Gilgit-Baltistan &nbsp;|&nbsp; Built with Claude AI</div>';
+  doc+='</body></html>';
+  var blob=new Blob([doc],{type:'application/msword'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='MSU_Report_'+now.replace(/\//g,'-')+'.doc';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function printReport(){window.print();}
+
+function loadData(){
+  var btn=document.getElementById("refreshBtn");
+  var status=document.getElementById("statusMsg");
+  btn.disabled=true;btn.textContent="Loading...";
+  status.textContent="Fetching latest data from Google Sheets...";
+  fetch("http://127.0.0.1:5000/data").then(function(res){return res.json();}).then(function(json){
+    var text=json.csv;
+    var rows=text.trim().split("\n").map(function(line){
+      var cols=[];var cur="";var inQ=false;
+      for(var i=0;i<line.length;i++){
+        if(line[i]===chr(34)){inQ=!inQ;}
+        else if(line[i]===","&&!inQ){cols.push(cur.trim());cur="";}
+        else{cur+=line[i];}
+      }
+      cols.push(cur.trim());return cols;
+    });
+    var hIdx=-1;
+    for(var i=0;i<rows.length;i++){if(rows[i].some(function(c){return c==="S.No"||c==="S.no";})){hIdx=i;break;}}
+    if(hIdx<0)throw new Error("Header not found");
+    ALL_DATA=[];
+    for(var i=hIdx+1;i<rows.length;i++){
+      var r=rows[i];
+      if(!r[0]||isNaN(parseInt(r[0])))continue;
+      ALL_DATA.push({sno:n(r[0]),camp:(r[1]||"").trim(),district:(r[2]||"").trim(),month:(r[3]||"").trim().replace(/\s+/g,""),quarter:(r[4]||"").trim(),year:(r[5]||"").trim(),dated:(r[6]||"").trim(),iuds:n(r[9]),implants:n(r[12]),oralCoc:n(r[15]),oralPop:n(r[18]),condoms:n(r[21]),sayana:n(r[24]),ecp:n(r[27]),depo:n(r[30]),magistron:n(r[33]),general:n(r[34]),prenatal:n(r[35]),postnatal:n(r[36]),children:n(r[37]),adult:n(r[38])});
+    }
+    populateFilters(ALL_DATA);
+    renderAll();
+    var now=new Date().toLocaleTimeString();
+    status.textContent="Last refreshed: "+now+" · "+ALL_DATA.length+" camps loaded";
+  }).catch(function(err){
+    status.textContent="Error: "+err.message;
+  }).finally(function(){
+    btn.disabled=false;btn.textContent="⟳ Refresh";
+  });
+}
+loadData();
+</script>
+</body>
+</html>
