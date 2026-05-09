@@ -2,7 +2,6 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 import requests
 import time
-import os
 
 app = Flask(__name__)
 CORS(app)
@@ -11,14 +10,19 @@ CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTwjR6tFIV7fZJfGQII2V
 
 @app.route('/data')
 def get_data():
-    response = requests.get(CSV_URL, params={'t': time.time()})
-    return jsonify({"csv": response.text})
+    try:
+        response = requests.get(CSV_URL, params={'t': str(time.time())})
+        return jsonify({"csv": response.text})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/')
 def home():
-    with open('dashboard.html') as f:
-        return f.read()
+    try:
+        with open('/Users/mac/MSU_Dashboard/dashboard.html') as f:
+            return f.read()
+    except Exception as e:
+        return str(e), 500
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(port=5000)
