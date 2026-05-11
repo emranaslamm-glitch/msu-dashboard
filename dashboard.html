@@ -115,6 +115,30 @@ tr:hover td{background:#faf5ff;}
 /* FOOTER */
 .footer{background:white;text-align:center;padding:14px;font-size:11px;color:#a0aec0;border-top:1px solid #f4f6fc;}
 
+.tab-content{display:none;}
+#tab-main{display:block;}
+.insight-card{background:white;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:16px;}
+.insight-title{font-size:15px;font-weight:700;color:#1a202c;margin-bottom:4px;}
+.insight-subtitle{font-size:12px;color:#a0aec0;margin-bottom:16px;}
+.insight-stat{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f4f6fc;}
+.insight-stat:last-child{border-bottom:none;}
+.insight-stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.insight-stat-label{font-size:12px;color:#718096;flex:1;}
+.insight-stat-value{font-size:16px;font-weight:700;color:#1a202c;}
+.insight-stat-badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;}
+.highlight-box{background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:12px;padding:20px;color:white;margin-bottom:16px;}
+.highlight-box h3{font-size:16px;font-weight:700;margin-bottom:8px;}
+.highlight-box p{font-size:13px;opacity:0.9;line-height:1.6;}
+.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.insight-number{font-size:36px;font-weight:800;color:#7c3aed;margin-bottom:4px;}
+.insight-number-label{font-size:12px;color:#a0aec0;}
+.rank-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f4f6fc;}
+.rank-row:last-child{border-bottom:none;}
+.rank-number{width:24px;height:24px;border-radius:50%;background:#ede7f6;color:#7c3aed;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rank-label{flex:1;font-size:12px;color:#2d3748;font-weight:500;}
+.rank-value{font-size:13px;font-weight:700;color:#1a202c;}
+.rank-bar-wrap{width:80px;background:#f4f6fc;border-radius:10px;height:6px;margin-left:8px;}
+.rank-bar{height:100%;border-radius:10px;background:linear-gradient(90deg,#7c3aed,#a855f7);}
 @media print{
   .sidebar,.topbar,.filters-card{display:none!important;}
   .main{margin-left:0;}
@@ -142,6 +166,7 @@ tr:hover td{background:#faf5ff;}
     <div class="nav-item" onclick="scrollToSection('sec-mcs')"><span class="nav-icon">🤱</span> Mother & Child</div>
     <div class="nav-item" onclick="scrollToSection('sec-children')"><span class="nav-icon">👶</span> Children</div>
     <div class="nav-item" onclick="scrollToSection('sec-camps')"><span class="nav-icon">🏕️</span> Camp Distribution</div>
+    <div class="nav-item" onclick="showTab('insights')"><span class="nav-icon">💡</span> Insights & Analysis</div>
     <div class="nav-section">Reports</div>
     <div class="nav-item" onclick="exportExcel()"><span class="nav-icon">📗</span> Export Excel</div>
     <div class="nav-item" onclick="exportPDF()"><span class="nav-icon">📕</span> Export PDF</div>
@@ -176,6 +201,7 @@ tr:hover td{background:#faf5ff;}
     </div>
   </div>
 
+  <div id="tab-main" class="tab-content active">
   <!-- CONTENT -->
   <div class="content">
 
@@ -240,6 +266,73 @@ tr:hover td{background:#faf5ff;}
 
   </div>
   <div class="footer">MSU Outreach Camps Dashboard · Gilgit-Baltistan · Built with Claude AI</div>
+  <div id="tab-insights" class="tab-content" style="padding:20px 24px;display:none;">
+    <div class="highlight-box" id="insight-headline">
+      <h3>📊 Dashboard Insights & Analysis</h3>
+      <p id="insight-summary-text">Click Refresh on the main dashboard to load data and generate insights.</p>
+    </div>
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-title">🏕️ Camp Overview</div>
+        <div class="insight-subtitle">Total outreach activity</div>
+        <div id="insight-camps"></div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-title">📅 Activity by Period</div>
+        <div class="insight-subtitle">Camps by quarter and month</div>
+        <div id="insight-period"></div>
+      </div>
+    </div>
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-title">🏆 District Rankings</div>
+        <div class="insight-subtitle">Districts by FP clients served</div>
+        <div id="insight-districts"></div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-title">💊 FP Method Demand</div>
+        <div class="insight-subtitle">Most to least demanded methods</div>
+        <div id="insight-fp-methods"></div>
+      </div>
+    </div>
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-title">🤱 Mother & Child Insights</div>
+        <div class="insight-subtitle">MCS service breakdown</div>
+        <div id="insight-mcs"></div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-title">👶 Children Services</div>
+        <div class="insight-subtitle">Children reached by district</div>
+        <div id="insight-children"></div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-title">📈 Key Findings & Recommendations</div>
+      <div class="insight-subtitle">Auto-generated analysis based on current data</div>
+      <div id="insight-findings" style="font-size:13px;color:#4a5568;line-height:1.8;"></div>
+    </div>
+    <div class="insight-grid">
+      <div class="chart-box">
+        <div class="chart-header"><div class="chart-title">FP clients — top districts</div><span class="chart-tag">Horizontal Bar</span></div>
+        <div style="position:relative;height:220px;"><canvas id="insightDistrictChart"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-header"><div class="chart-title">FP method demand</div><span class="chart-tag">Bar</span></div>
+        <div style="position:relative;height:220px;"><canvas id="insightMethodChart"></canvas></div>
+      </div>
+    </div>
+    <div class="insight-grid">
+      <div class="chart-box">
+        <div class="chart-header"><div class="chart-title">MCS services comparison</div><span class="chart-tag">Doughnut</span></div>
+        <div style="position:relative;height:220px;"><canvas id="insightMCSChart"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-header"><div class="chart-title">Children by district</div><span class="chart-tag">Bar</span></div>
+        <div style="position:relative;height:220px;"><canvas id="insightChildrenChart"></canvas></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -498,6 +591,141 @@ function scrollToSection(id){
   }
 }
 
+function showTab(tab){
+  document.querySelectorAll(".tab-content").forEach(function(t){t.style.display="none";});
+  document.getElementById("tab-"+tab).style.display="block";
+  document.querySelectorAll(".nav-item").forEach(function(n){n.classList.remove("active");});
+  if(tab==="insights"){
+    setTimeout(function(){renderInsights();},200);
+    document.querySelectorAll(".nav-item")[5].classList.add("active");
+  } else {
+    document.querySelectorAll(".nav-item")[0].classList.add("active");
+  }
+  document.querySelectorAll(".tab-content").forEach(function(t){t.style.display="none";});
+  document.getElementById("tab-"+tab).style.display="block";
+  document.querySelectorAll(".nav-item").forEach(function(n){n.classList.remove("active");});
+  if(tab==="main"){
+    document.querySelectorAll(".nav-item")[0].classList.add("active");
+  } else {
+    document.querySelectorAll(".nav-item")[5].classList.add("active");
+  }
+}
+
+function renderInsights(){
+  var data=ALL_DATA;
+  if(!data.length)return;
+
+  var districts=[...new Set(data.map(function(r){return r.district;}))].filter(Boolean).sort();
+  var totalCamps=data.length;
+  var totalFP=data.reduce(function(a,r){return a+r.iuds+r.implants+r.oralCoc+r.oralPop+r.condoms+r.sayana+r.ecp+r.depo;},0);
+  var totalMCS=data.reduce(function(a,r){return a+r.general+r.prenatal+r.postnatal+r.children+r.adult;},0);
+
+  // District FP totals
+  var distFP=districts.map(function(d){return {name:d,fp:data.filter(function(r){return r.district===d;}).reduce(function(a,r){return a+r.iuds+r.implants+r.oralCoc+r.oralPop+r.condoms+r.sayana+r.ecp+r.depo;},0),camps:data.filter(function(r){return r.district===d;}).length};});
+  distFP.sort(function(a,b){return b.fp-a.fp;});
+  var topDistrict=distFP[0];
+  var lowestDistrict=distFP[distFP.length-1];
+
+  // FP methods
+  var fpTotals=FP_KEYS.map(function(k,i){return {name:FP_LABELS[i],key:k,total:data.reduce(function(a,r){return a+(r[k]||0);},0)};});
+  fpTotals.sort(function(a,b){return b.total-a.total;});
+  var topMethod=fpTotals[0];
+
+  // MCS
+  var mcsItems=[
+    {name:"General patients",val:data.reduce(function(a,r){return a+r.general;},0)},
+    {name:"Pre-natal",val:data.reduce(function(a,r){return a+r.prenatal;},0)},
+    {name:"Post-natal",val:data.reduce(function(a,r){return a+r.postnatal;},0)},
+    {name:"Children",val:data.reduce(function(a,r){return a+r.children;},0)},
+    {name:"Adults",val:data.reduce(function(a,r){return a+r.adult;},0)}
+  ];
+  mcsItems.sort(function(a,b){return b.val-a.val;});
+
+  // Children by district
+  var childDist=districts.map(function(d){return {name:d,val:data.filter(function(r){return r.district===d;}).reduce(function(a,r){return a+r.children;},0)};});
+  childDist.sort(function(a,b){return b.val-a.val;});
+
+  // Periods
+  var months=[...new Set(data.map(function(r){return r.month;}))].filter(Boolean);
+  var quarters=[...new Set(data.map(function(r){return r.quarter;}))].filter(Boolean);
+
+  // Headline
+  document.getElementById("insight-summary-text").innerHTML="Across <strong>"+totalCamps+" outreach camps</strong> in "+districts.length+" districts, <strong>"+totalFP.toLocaleString()+" FP clients</strong> and <strong>"+totalMCS.toLocaleString()+" MCS clients</strong> were served. <strong>"+topDistrict.name+"</strong> leads in FP service delivery and <strong>"+topMethod.name+"</strong> is the most demanded FP method.";
+
+  // Camp overview
+  var campColors=["#ede7f6","#e8f5e9","#e3f2fd","#fff8e1"];
+  document.getElementById("insight-camps").innerHTML=[
+    {icon:"🏕️",label:"Total camps conducted",val:totalCamps,bg:"#ede7f6"},
+    {icon:"💊",label:"Total FP clients served",val:totalFP.toLocaleString(),bg:"#e8f5e9"},
+    {icon:"🤱",label:"Total MCS clients",val:totalMCS.toLocaleString(),bg:"#e3f2fd"},
+    {icon:"🗺️",label:"Districts covered",val:districts.length,bg:"#fff8e1"}
+  ].map(function(s){return "<div class=insight-stat><div class=insight-stat-icon style=background:"+s.bg+">"+s.icon+"</div><div class=insight-stat-label>"+s.label+"</div><div class=insight-stat-value>"+s.val+"</div></div>";}).join("");
+
+  // Period
+  document.getElementById("insight-period").innerHTML=[
+    {icon:"📅",label:"Months with camp activity",val:months.length+" months",bg:"#ede7f6"},
+    {icon:"📊",label:"Quarters covered",val:quarters.join(", "),bg:"#e8f5e9"},
+    {icon:"🏆",label:"Most active district",val:topDistrict.name+" ("+topDistrict.camps+" camps)",bg:"#e3f2fd"},
+    {icon:"📍",label:"Avg camps per district",val:Math.round(totalCamps/districts.length)+" camps",bg:"#fff8e1"}
+  ].map(function(s){return "<div class=insight-stat><div class=insight-stat-icon style=background:"+s.bg+">"+s.icon+"</div><div class=insight-stat-label>"+s.label+"</div><div class=insight-stat-value>"+s.val+"</div></div>";}).join("");
+
+  // District rankings
+  var maxFP=distFP[0].fp;
+  document.getElementById("insight-districts").innerHTML=distFP.map(function(d,i){
+    var pct=maxFP>0?Math.round((d.fp/maxFP)*100):0;
+    return "<div class=rank-row><div class=rank-number>"+(i+1)+"</div><div class=rank-label>"+d.name+"</div><div class=rank-bar-wrap><div class=rank-bar style=width:"+pct+"%></div></div><div class=rank-value>"+d.fp+"</div></div>";
+  }).join("");
+
+  // FP methods ranking
+  var maxMethod=fpTotals[0].total;
+  document.getElementById("insight-fp-methods").innerHTML=fpTotals.map(function(m,i){
+    var pct=maxMethod>0?Math.round((m.total/maxMethod)*100):0;
+    var colors=["#7c3aed","#06b6d4","#f59e0b","#ef4444","#10b981","#8b5cf6","#ec4899","#6366f1"];
+    return "<div class=rank-row><div class=rank-number style=background:"+colors[i%colors.length]+"22;color:"+colors[i%colors.length]+">"+(i+1)+"</div><div class=rank-label>"+m.name+"</div><div class=rank-bar-wrap><div class=rank-bar style=width:"+pct+"%;background:"+colors[i%colors.length]+"></div></div><div class=rank-value>"+m.total+"</div></div>";
+  }).join("");
+
+  // MCS breakdown
+  document.getElementById("insight-mcs").innerHTML=mcsItems.map(function(m,i){
+    var icons=["👥","🤰","🤱","👶","🧑"];
+    var bgs=["#ede7f6","#e3f2fd","#e8f5e9","#fff8e1","#fce4ec"];
+    return "<div class=insight-stat><div class=insight-stat-icon style=background:"+bgs[i]+">"+icons[i]+"</div><div class=insight-stat-label>"+m.name+"</div><div class=insight-stat-value>"+m.val+"</div></div>";
+  }).join("");
+
+  // Children by district
+  var maxChild=childDist[0].val;
+  document.getElementById("insight-children").innerHTML=childDist.map(function(d,i){
+    var pct=maxChild>0?Math.round((d.val/maxChild)*100):0;
+    return "<div class=rank-row><div class=rank-number>"+(i+1)+"</div><div class=rank-label>"+d.name+"</div><div class=rank-bar-wrap><div class=rank-bar style=width:"+pct+"%></div></div><div class=rank-value>"+d.val+"</div></div>";
+  }).join("");
+
+  // Key findings
+  var avgFPPerCamp=Math.round(totalFP/totalCamps);
+  var findings="";
+  findings+="<p>✅ <strong>"+topDistrict.name+"</strong> is the highest performing district with <strong>"+topDistrict.fp+" FP clients</strong> served across "+topDistrict.camps+" camps, averaging "+Math.round(topDistrict.fp/topDistrict.camps)+" clients per camp.</p>";
+  findings+="<p>📌 <strong>"+topMethod.name+"</strong> is the most demanded family planning method with <strong>"+topMethod.total+" clients</strong>, accounting for "+Math.round((topMethod.total/totalFP)*100)+"% of total FP uptake.</p>";
+  findings+="<p>⚠️ <strong>"+lowestDistrict.name+"</strong> has the lowest FP service delivery with <strong>"+lowestDistrict.fp+" clients</strong> across "+lowestDistrict.camps+" camps — may require increased outreach attention.</p>";
+  findings+="<p>👶 A total of <strong>"+data.reduce(function(a,r){return a+r.children;},0)+" children</strong> were served across all camps. <strong>"+childDist[0].name+"</strong> served the most children ("+childDist[0].val+").</p>";
+  findings+="<p>📊 On average, each camp served <strong>"+avgFPPerCamp+" FP clients</strong>. Districts below this average may benefit from targeted capacity building.</p>";
+  findings+="<p>🤱 Pre-natal services reached <strong>"+data.reduce(function(a,r){return a+r.prenatal;},0)+" women</strong> while post-natal services covered <strong>"+data.reduce(function(a,r){return a+r.postnatal;},0)+" women</strong> across all camps.</p>";
+  document.getElementById("insight-findings").innerHTML=findings;
+
+  // Charts
+  var dColors=["#7c3aed","#06b6d4","#f59e0b","#ef4444","#10b981","#8b5cf6","#ec4899","#6366f1"];
+  if(charts.insightDistrict)charts.insightDistrict.destroy();
+  charts.insightDistrict=new Chart(document.getElementById("insightDistrictChart"),{type:"bar",data:{labels:distFP.map(function(d){return d.name;}),datasets:[{data:distFP.map(function(d){return d.fp;}),backgroundColor:dColors,borderRadius:6}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#a0aec0",font:{size:9}}},y:{ticks:{color:"#2d3748",font:{size:10}}}}}});
+
+  if(charts.insightMethod)charts.insightMethod.destroy();
+  charts.insightMethod=new Chart(document.getElementById("insightMethodChart"),{type:"bar",data:{labels:fpTotals.map(function(m){return m.name;}),datasets:[{data:fpTotals.map(function(m){return m.total;}),backgroundColor:dColors,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#a0aec0",font:{size:9},maxRotation:30}},y:{ticks:{color:"#a0aec0",font:{size:9}}}}}});
+
+  var mcsColors=["#7c3aed","#06b6d4","#8b5cf6","#f59e0b","#ef4444"];
+  if(charts.insightMCS)charts.insightMCS.destroy();
+  charts.insightMCS=new Chart(document.getElementById("insightMCSChart"),{type:"doughnut",data:{labels:mcsItems.map(function(m){return m.name;}),datasets:[{data:mcsItems.map(function(m){return m.val;}),backgroundColor:mcsColors,borderWidth:2,borderColor:"white"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},color:"#718096"}}}}});
+
+  var childColors=childDist.map(function(_,i){return dColors[i%dColors.length];});
+  if(charts.insightChildren)charts.insightChildren.destroy();
+  charts.insightChildren=new Chart(document.getElementById("insightChildrenChart"),{type:"bar",data:{labels:childDist.map(function(d){return d.name;}),datasets:[{data:childDist.map(function(d){return d.val;}),backgroundColor:childColors,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#a0aec0",font:{size:9},maxRotation:30}},y:{ticks:{color:"#a0aec0",font:{size:9}}}}}});
+}
+
 function loadData(){
   var btn=document.getElementById("refreshBtn");
   var status=document.getElementById("statusMsg");
@@ -523,6 +751,7 @@ function loadData(){
     renderAll();
     var now=new Date().toLocaleTimeString();
     status.textContent="Refreshed: "+now+" · "+ALL_DATA.length+" camps";
+    renderInsights();
   }).catch(function(err){
     status.textContent="Error: "+err.message;
   }).finally(function(){
